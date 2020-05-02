@@ -41,23 +41,12 @@ const User = sequelize.define('user', {
             len: [5, 120]
         }
     },
-    state: {
-        type: Sequelize.STRING(60)
-    },
-    city: {
-        type: Sequelize.STRING(80)
+    whatsapp: {
+        type: Sequelize.STRING(20),
+        allowNull: false
     },
     profileImage: {
         type: Sequelize.STRING(120),
-        allowNull: false,
-    },
-    plan: {
-        type: Sequelize.ENUM('free', 'month', 'anual'),
-        allowNull: false,
-        defaultValue: 'free'
-    },
-    last_payment: {
-        type: Sequelize.DATEONLY,
         allowNull: false,
     }
 }, {

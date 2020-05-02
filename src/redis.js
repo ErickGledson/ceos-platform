@@ -1,22 +1,20 @@
 const redis = require('ioredis');
 const client = new redis({ password: 'root', port: 6379, host: 'redisservice' });
 
-async function cacheRequestMiddleware(ctx, next) {
-    const client = ctx.state.redis;
-    const data = await client.get(ctx.request.url);
+async function cacheRequestMiddleware(request, response, next) {
+    const data = await client.get(request.url);
 
     if (!data) {
         await next();
-        return await client.set(ctx.request.url, ctx.body);
+        return await client.set(request.url, response.body);
     }
 
-    ctx.body = data;
+    response.body = data;
 }
 
-async function updateCacheRequestMiddleware(ctx, next) {
-    const client = ctx.state.redis;
+async function updateCacheRequestMiddleware(request, response, next) {
     await next();
-    await client.del(ctx.request.url);
+    await client.del(request.url);
 }
 
 module.exports = {

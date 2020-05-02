@@ -7,9 +7,14 @@ const cors = require('cors');
 const app = express();
 
 process.env.JWT_SECRET = '12345';
+process.env.ACCOUNT_SID = '';
+process.env.ASSISTANT_SID = '';
+process.env.REST_API_ACCOUNT_SID = '';
+process.env.AUTH_TOKEN = '';
+process.env.BOT_WHATSAPP_NUMBER = '';
 
 app.use(cors());
-app.use(parser.urlencoded({ extended: true }));
+app.use(parser.urlencoded({ extended: false }));
 app.use(parser.json());
 app.use(helmet());
 
