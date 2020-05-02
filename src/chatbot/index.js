@@ -26,7 +26,7 @@ const awnser = async function (messageId) {
 
         const questionBody = `Language=en-US&UserId=${message.id}-${product.id}&Text=${question}`;
         const authorization = new Buffer(`${REST_API_ACCOUNT_SID}:${AUTH_TOKEN}`).toString('base64');
-        
+
         const requestService = promisify(request.post);
         const botResponse = await requestService(CHATBOT_URL, {
             headers: {
@@ -46,17 +46,27 @@ const awnser = async function (messageId) {
                 current_task,
                 user_identifier
             }
-         } = botResponseData;
-         const chatbotText = says[0].text;
+        } = botResponseData;
+        const chatbotText = says[0].text;
 
-         if (chatbotText.includes("_HELP")) {
+        if (chatbotText.includes("_HELP")) {
             questionWhatsapp({ product, message, whatsappNumber });
 
             return {
                 code: 200,
                 send_whatsapp: true
             };
-         }
+        }
+
+        let messageAwnser = "";
+        if (chatbotText.includes("{SIZE}")) {
+            messageAwnser = chatbotText.replace("{SIZE}", `${product.sizeW}(L)x${product.height}(A)`);
+        }
+        else if (chatbotText.includes("{COLORS}")) {
+            messageAwnser = chatbotText.replace("{COLORS}", `${product.color}`);
+        }
+
+        await Message.update({ message }, { where: { id: message.id } });
 
         return {
             code: 200,
@@ -80,12 +90,12 @@ const questionWhatsapp = async function ({ product, message, whatsappNumber }) {
             to: `whatsapp:${whatsappNumber}`,
             body: `Preciso de ajuda com a seguinte dúvida do produto ${product.name}: ${message.question}`
         })
-        .then(data => {
-            RedisClient.set('send_whatsapp', message.id);
-        })
-        .catch(error => {
-            console.log(error);
-        });
+            .then(data => {
+                RedisClient.set('send_whatsapp', message.id);
+            })
+            .catch(error => {
+                console.log(error);
+            });
     } catch (error) {
         return null;
     }
@@ -96,7 +106,11 @@ exports.question = questionWhatsapp;
 exports.whatsAppWebhook = async function (req, res) {
     const message = req.body.Body;
     const twiml = new MessagingResponse();
-    RedisClient.del('send_whatsapp');
+    const messageId = await RedisClient.get('send_whatsapp');
+
+    await RedisClient.del('send_whatsapp');
+    await Message.update({ message }, { where: { id: messageId } });
+
     twiml.message(`Agradeço pela sua ajuda! :)`);
     res.send(twiml.toString());
 } 
