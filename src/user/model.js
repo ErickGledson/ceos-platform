@@ -24,6 +24,10 @@ const User = sequelize.define('user', {
             }
         }
     },
+    lastname: {
+        type: Sequelize.STRING(80),
+        allowNull: false,
+    },
     email: {
         type: Sequelize.STRING(120),
         allowNull: false,
@@ -45,10 +49,16 @@ const User = sequelize.define('user', {
         type: Sequelize.STRING(20),
         allowNull: false
     },
-    profileImage: {
+    profile_image: {
         type: Sequelize.STRING(120),
         allowNull: false,
-    }
+    },
+    state: {
+        type: Sequelize.STRING(60),
+    },
+    city: {
+        type: Sequelize.STRING(80),
+    },
 }, {
     timestamps: true,
     createdAt: 'createdAt',

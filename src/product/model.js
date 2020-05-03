@@ -39,7 +39,17 @@ const Product = sequelize.define("products", {
     image: {
         type: Sequelize.STRING(120),
         allowNull: false,
-    }
+    },
+    user_id: {
+        type: Sequelize.INTEGER,
+        references: {
+            model: "users",
+            key: "id",
+        },
+        onUpdate: "CASCADE",
+        onDelete: "CASCADE",
+        allowNull: false,
+    },
 }, {
     timestamps: true,
     createdAt: 'createdAt',

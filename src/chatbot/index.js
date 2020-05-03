@@ -3,28 +3,28 @@ const twilio = require('twilio');
 const { promisify } = require('util');
 const Product = require('../product/model');
 const Message = require('../message/model');
+const User = require('../user/model');
 const { client: RedisClient } = require('../redis');
 
-const { ACCOUNT_SID, ASSISTANT_SID, REST_API_ACCOUNT_SID, AUTH_TOKEN, BOT_WHATSAPP_NUMBER } = process.env;
+const { ACCOUNT_SID, ASSISTANT_SID, REST_API_ACCOUNT_SID, AUTH_TOKEN, BOT_WHATSAPP_NUMBER, WHATSAPP_BOT_ACCOUNT_SID, WHATSAPP_BOT_REST_TOKEN } = process.env;
 const MessagingResponse = twilio.twiml.MessagingResponse;
 const client = twilio(
-    ACCOUNT_SID,
-    AUTH_TOKEN
+    WHATSAPP_BOT_ACCOUNT_SID,
+    WHATSAPP_BOT_REST_TOKEN
 );
 const CHATBOT_URL = `https://channels.autopilot.twilio.com/v2/${ACCOUNT_SID}/${ASSISTANT_SID}/custom/chat`;
 
-const awnser = async function (messageId) {
+const awnser = async function (message) {
     try {
         const send_whatsapp_question = await RedisClient.get('send_whatsapp');
-        if (send_whatsapp_question) return;
-
-        const message = await Message.findByPk(messageId);
-        if (!message) return { code: 500, message: 'Mensagem não encontrada' };
+        if (send_whatsapp_question) return { code: 401, message: 'Aguardando resposta do whatsapp' };
 
         const product = await Product.findByPk(message.product_id);
         if (!product) return { code: 500, message: 'Produto não encontrado' };
 
-        const questionBody = `Language=en-US&UserId=${message.id}-${product.id}&Text=${question}`;
+        const user = await User.findByPk(product.user_id);
+
+        const questionBody = `Language=en-US&UserId=${message.id}-${product.id}&Text=${message.question}`;
         const authorization = new Buffer(`${REST_API_ACCOUNT_SID}:${AUTH_TOKEN}`).toString('base64');
 
         const requestService = promisify(request.post);
@@ -50,7 +50,7 @@ const awnser = async function (messageId) {
         const chatbotText = says[0].text;
 
         if (chatbotText.includes("_HELP")) {
-            questionWhatsapp({ product, message, whatsappNumber });
+            questionWhatsapp({ product, message, whatsappNumber: user.whatsapp });
 
             return {
                 code: 200,
@@ -60,13 +60,14 @@ const awnser = async function (messageId) {
 
         let messageAwnser = "";
         if (chatbotText.includes("{SIZE}")) {
-            messageAwnser = chatbotText.replace("{SIZE}", `${product.sizeW}(L)x${product.height}(A)`);
-        }
-        else if (chatbotText.includes("{COLORS}")) {
+            messageAwnser = chatbotText.replace("{SIZE}", `${product.sizeW}(L)x${product.sizeH}(A)`);
+        } else if (chatbotText.includes("{COLORS}")) {
             messageAwnser = chatbotText.replace("{COLORS}", `${product.color}`);
+        } else if (current_task.includes("disponibilidade")) {
+            messageAwnser = product.stock >= 1 ? chatbotText : 'Não temos mais em estoque.';
         }
 
-        await Message.update({ message }, { where: { id: message.id } });
+        await Message.update({ message: messageAwnser }, { where: { id: message.id } });
 
         return {
             code: 200,
@@ -76,6 +77,7 @@ const awnser = async function (messageId) {
             send_whatsapp: false
         };
     } catch (error) {
+        console.log(error);
         return {
             code: 500,
             message: error.message
