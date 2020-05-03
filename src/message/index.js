@@ -30,7 +30,7 @@ exports.awnser = async function (request, response) {
 
         if (!message) return response.status(401).json({ message: 'Mensagem não encontrada' });
 
-        await Message.update({ message: awnser }, { where: id })
+        await Message.update({ message: awnser }, { where: { id } })
 
         response.status(200).json({ message: 'updated' });
     } catch (error) {
