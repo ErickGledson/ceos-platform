@@ -20,7 +20,7 @@ exports.login = (request, response) => {
         .then(user => {
             if (!user) return response.status(401).json({ message: 'Usuário e/ou senha inválido(s)' });
 
-            if (!user.comparePassword(request.body.password))
+            if (!user.validatePassword(request.body.password))
                 return response.status(401).json({ message: 'Usuário e/ou senha inválido(s)' });
 
             response.status(200).json({

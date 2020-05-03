@@ -61,9 +61,9 @@ const User = sequelize.define('user', {
     },
 }, {
     timestamps: true,
-    createdAt: 'createdAt',
-    updatedAt: 'updatedAt',
-    deletedAt: 'deletedAt',
+    createdAt: 'created_at',
+    updatedAt: 'updated_at',
+    deletedAt: 'deleted_at',
     paranoid: true,
 });
 

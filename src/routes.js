@@ -13,6 +13,6 @@ module.exports = app => {
     app.use('/api/auth', auth);
     app.use('/api/user', authenticate, user);
     app.use('/api/chatbot', chatbot);
-    app.use('/api/product', cacheRequestMiddleware, product);
+    app.use('/api/product', product);
     app.use('/api/message', message);
 };

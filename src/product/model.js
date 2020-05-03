@@ -28,11 +28,11 @@ const Product = sequelize.define("products", {
         type: Sequelize.STRING(50),
         allowNull: false,
     },
-    sizeW: {
+    size_w: {
         type: Sequelize.INTEGER,
         allowNull: false
     },
-    sizeH: {
+    size_h: {
         type: Sequelize.INTEGER,
         allowNull: false
     },
@@ -52,9 +52,9 @@ const Product = sequelize.define("products", {
     },
 }, {
     timestamps: true,
-    createdAt: 'createdAt',
-    updatedAt: 'updatedAt',
-    deletedAt: 'deletedAt',
+    createdAt: 'created_at',
+    updatedAt: 'updated_at',
+    deletedAt: 'deleted_at',
     paranoid: true,
 });
 
